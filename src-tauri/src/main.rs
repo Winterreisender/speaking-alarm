@@ -6,10 +6,8 @@ mod tray;
 mod speaker;
 
 #[tauri::command]
-fn time_report(name: &str) -> String {
-    speaker::time_report();
-
-    format!("Hello, {}! You've been greeted from Rust!", name)
+fn time_report() -> Result<(), String> {
+    speaker::time_report().map_err(|it| it.to_string())
 }
 
 fn main() {

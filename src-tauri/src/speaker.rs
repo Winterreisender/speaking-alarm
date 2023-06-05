@@ -17,12 +17,14 @@ lazy_static! {
     };
 }
 
-pub fn time_report() {
+pub fn time_report() -> Result<(), tts::Error> {
     let now = Local::now();
     let ref text = format!(
         "现在是 {:02}:{:02}",
         now.hour(),
         now.minute()
     );
-    TTS.lock().unwrap().speak(text, true).unwrap();
+    TTS.lock().unwrap().speak(text, true)?;
+
+    Ok(())
 }

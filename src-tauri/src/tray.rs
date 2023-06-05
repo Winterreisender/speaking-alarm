@@ -16,7 +16,7 @@ pub fn menu() -> SystemTray {
 pub fn handler(_: &AppHandle, event: SystemTrayEvent) {
     match event {
         SystemTrayEvent::LeftClick { position: _, size: _, .. } => {
-            speaker::time_report();
+            speaker::time_report().unwrap();
         }
 
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
