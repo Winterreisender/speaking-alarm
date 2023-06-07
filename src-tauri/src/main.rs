@@ -6,12 +6,13 @@ mod tray;
 mod speaker;
 
 #[tauri::command]
-fn time_report() -> Result<(), String> {
-    speaker::time_report().map_err(|it| it.to_string())
+fn time_report(hour12 :bool) -> Result<(), String> {
+    speaker::time_report(hour12).map_err(|it| it.to_string())
 }
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::default().build())
         .system_tray(tray::menu())
         .on_system_tray_event(tray::handler)
         .invoke_handler(tauri::generate_handler![time_report])
