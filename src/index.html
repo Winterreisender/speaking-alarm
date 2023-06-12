@@ -1,17 +1,145 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Speaking Alarm</title>
     <link rel="stylesheet" href="styles.css" />
-    <script type="module" defer>
+    <script type="module">
       const { invoke } = window.__TAURI__.tauri;
-      await invoke("time_report", {});
+      import { Store } from "./store.min.js";
+
+      let config = {}
+      const store = new Store(".preference.dat");
+      const form = document.querySelector('#preference');
+
+      function set_form(form, data) {
+        for (const [name, value] of Object.entries(data)) {
+            const input = form.elements[name];
+
+            if (input.type === 'radio') {
+                const radio = [...form.elements[name]].find(r => r.value === value);
+                if (radio) {
+                    radio.checked = true;
+                }
+            } else {
+                input.value = value;
+            }
+        }
+      }
+
+      async function update_ui() {
+        set_form(form, config);
+      }
+
+      async function update_config() {
+        const data = new FormData(form);
+        for(const [k,v] of data) {
+          config[k] = JSON.parse(v);
+        }
+      }
+
+      async function save_config() {
+        await store.set("config", config);
+      }
+
+      async function load_config() {
+        config = await store.get("config");
+      }
+
+      async function time_report() {
+        await invoke("time_report", config);
+      }
+
+      async function main(_) {
+        await load_config();
+        if(config === {} || config === null) {
+          update_config();
+        } else {
+          update_ui();
+        }
+
+        document.querySelector('#preference').addEventListener('submit', async (e)=>{
+          e.preventDefault();
+
+          update_config();
+          console.info(config);
+
+          await save_config();
+        });
+
+        document.querySelector('#time_report').addEventListener('click', async ()=> {
+          await time_report();
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', main);
     </script>
   </head>
 
   <body>
+    <form id='preference'>
+
+      <fieldset>
+        <legend>时间格式</legend>
+        <div>
+          <input type="radio" name="hour12" value="false" checked></input>
+          <label for="hour24">使用24小时制</label>
+  
+          <input type="radio" name="hour12" value="true"></input>
+          <label for="hour12">使用12小时制</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>报时规则</legend>
+        <div>
+          <input type="radio" name="period" value="3600" checked></input>
+          <label for="hour24">整点报时</label>
+  
+          <input type="radio" name="period" value="1800"></input>
+          <label for="hour12">半点报时</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>播报日期</legend>
+        <div>
+          <input type="radio" name="date_report" value="disabled" checked></input>
+          <label for="date_report">不播报日期</label>
+  
+          <input type="radio" name="date_report" value="week"></input>
+          <label for="date_report">播报星期</label>
+
+          <input type="radio" name="date_report" value="mmdd"></input>
+          <label for="date_report">播报月日</label>
+
+          <input type="radio" name="date_report" value="yymmdd"></input>
+          <label for="date_report">播报年月日</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>开机启动</legend>
+        <div>
+          <input type="checkbox" name="startup"></input>
+          <label for="startup">开机启动</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>关于</legend>
+        <div>
+          <img src="img/logo.svg" width="32">
+          <label for="hour12">Speaking Alarm v0.0.1</label>
+        </div>
+      </fieldset>
+
+      <button type="submit">提交</input> 
+
+    </form>
+
+    <button id="time_report">立即报时</button>
 
   </body>
 </html>

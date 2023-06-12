@@ -1,7 +1,19 @@
-# Tauri + Vanilla
+# 语音钟
 
-This template should help get you started developing with Tauri in vanilla HTML, CSS and Javascript.
+用Tauri复刻[saying语音钟](https://www.appinn.com/voice-clock/)的功能。
 
-## Recommended IDE Setup
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+# 目标
+
+- [X] 整点/半点报时
+- [X] 时间格式
+- [ ] 播报日期
+- [ ] 闹钟
+- [ ] 开机启动
+- [ ] 定制声音
+- [ ] 网络校时
+
+
+# 许可
+
+AGPL-3.0-only
