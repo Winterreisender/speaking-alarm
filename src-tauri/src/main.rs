@@ -4,13 +4,16 @@
 
 mod tray;
 mod speaker;
+mod timer;
 
 #[tauri::command]
 fn time_report(hour12 :bool) -> Result<(), String> {
     speaker::time_report(hour12).map_err(|it| it.to_string())
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    timer::start_timer();
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
         .system_tray(tray::menu())

@@ -20,6 +20,7 @@ serde_json = "1.0"
 tts="*"
 lazy_static="*"
 chrono="*"
+tokio= {features = ['full']}
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
