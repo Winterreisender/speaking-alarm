@@ -1,42 +1,37 @@
-use std::{future::Future, time::{Duration}};
+use std::{time::{Duration}, sync::Mutex};
 use chrono::Timelike;
-use tokio;
+use tokio::{self, task::JoinHandle};
+use lazy_static::lazy_static;
 
 use crate::speaker;
-
-// from https://users.rust-lang.org/t/setinterval-in-rust/41664 by alice
-fn set_interval<F, Fut>(mut f: F, dur: Duration)
-where
-    F: Send + 'static + FnMut() -> Fut,
-    Fut: Future<Output = ()> + Send + 'static,
-{
-    // Create stream of intervals.
-    let mut interval = tokio::time::interval(dur);
-    
-    tokio::spawn(async move {
-        // Skip the first tick at 0ms.
-        interval.tick().await;
-        loop {
-            // Wait until next tick.
-            interval.tick().await;
-            // Spawn a task for this tick.
-            tokio::spawn(f());
-        }
-    });
-}
 
 async fn check_and_report_time(minutes :Vec<u32>) {
     let now = chrono::Local::now();
     if minutes.contains(&now.minute()) {
-        speaker::time_report(false).unwrap();
+        speaker::time_report(false,String::from("none")).unwrap();
     }
     println!("Timer! {}", now)
 }
 
 
-pub fn start_timer() {
-    async fn tick() {
-        check_and_report_time(vec![10,20,30,40,50]).await
-    }
-    set_interval(tick, Duration::from_secs(60));
+
+static spawn: std::sync::Mutex<Option<JoinHandle<()>>> = Mutex::new(None);
+
+pub fn start_timer(dur :Duration) -> JoinHandle<()> {
+
+    let mut interval = tokio::time::interval(dur);
+    
+    tokio::spawn(async move {
+        // Skip the first tick
+        interval.tick().await;
+        loop {
+            interval.tick().await;
+            tokio::spawn(check_and_report_time(vec![0]));
+        }
+    })
+}
+
+pub fn change_timer() {
+    let mut guard = spawn.lock().unwrap();
+    *guard = Some(start_timer(Duration::from_secs(60*10)));
 }
