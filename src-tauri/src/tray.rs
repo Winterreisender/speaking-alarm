@@ -1,4 +1,4 @@
-use tauri::{AppHandle, SystemTrayEvent, SystemTray, CustomMenuItem, SystemTrayMenu, SystemTrayMenuItem, SystemTraySubmenu};
+use tauri::{AppHandle, SystemTrayEvent, SystemTray, CustomMenuItem, SystemTrayMenu, SystemTrayMenuItem}; //, SystemTraySubmenu
 
 use crate::speaker;
 
@@ -16,7 +16,7 @@ pub fn menu() -> SystemTray {
 pub fn handler(_: &AppHandle, event: SystemTrayEvent) {
     match event {
         SystemTrayEvent::LeftClick { position: _, size: _, .. } => {
-            speaker::time_report(false).unwrap();
+            speaker::time_report().unwrap();
         }
 
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {

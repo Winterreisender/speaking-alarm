@@ -1,21 +1,10 @@
 use std::{time::{Duration}, sync::Mutex};
 use chrono::Timelike;
 use tokio::{self, task::JoinHandle};
-use lazy_static::lazy_static;
 
 use crate::speaker;
 
-async fn check_and_report_time(minutes :Vec<u32>) {
-    let now = chrono::Local::now();
-    if minutes.contains(&now.minute()) {
-        speaker::time_report(false,String::from("none")).unwrap();
-    }
-    println!("Timer! {}", now)
-}
-
-
-
-static spawn: std::sync::Mutex<Option<JoinHandle<()>>> = Mutex::new(None);
+static integral_minutes: Mutex<Vec<u32>> = Mutex::new(vec![]);
 
 pub fn start_timer(dur :Duration) -> JoinHandle<()> {
 
@@ -26,12 +15,16 @@ pub fn start_timer(dur :Duration) -> JoinHandle<()> {
         interval.tick().await;
         loop {
             interval.tick().await;
-            tokio::spawn(check_and_report_time(vec![0]));
+
+            let now = chrono::Local::now();
+            if integral_minutes.lock().unwrap().contains(&now.minute()) {
+                speaker::time_report().unwrap();
+            }
         }
     })
 }
 
-pub fn change_timer() {
-    let mut guard = spawn.lock().unwrap();
-    *guard = Some(start_timer(Duration::from_secs(60*10)));
+pub fn set_integral_minutes(minutes :&Vec<u32>) {
+    let mut guard = integral_minutes.lock().unwrap();
+    *guard = minutes.clone();
 }
