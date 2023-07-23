@@ -1,10 +1,10 @@
-use std::{time::{Duration}, sync::Mutex};
+use std::{time::Duration, sync::Mutex};
 use chrono::Timelike;
 use tokio::{self, task::JoinHandle};
 
 use crate::speaker;
 
-static integral_minutes: Mutex<Vec<u32>> = Mutex::new(vec![]);
+static INTEGRAL_MINUTES: Mutex<Vec<u32>> = Mutex::new(vec![]);
 
 pub fn start_timer(dur :Duration) -> JoinHandle<()> {
 
@@ -12,12 +12,11 @@ pub fn start_timer(dur :Duration) -> JoinHandle<()> {
     
     tokio::spawn(async move {
         // Skip the first tick
-        interval.tick().await;
         loop {
             interval.tick().await;
 
             let now = chrono::Local::now();
-            if integral_minutes.lock().unwrap().contains(&now.minute()) {
+            if INTEGRAL_MINUTES.lock().unwrap().contains(&now.minute()) {
                 speaker::time_report().unwrap();
             }
         }
@@ -25,6 +24,6 @@ pub fn start_timer(dur :Duration) -> JoinHandle<()> {
 }
 
 pub fn set_integral_minutes(minutes :&Vec<u32>) {
-    let mut guard = integral_minutes.lock().unwrap();
+    let mut guard = INTEGRAL_MINUTES.lock().unwrap();
     *guard = minutes.clone();
 }

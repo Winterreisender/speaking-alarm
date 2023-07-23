@@ -10,13 +10,12 @@
       import { Store } from "./store.min.js";
 
       let config = {};
-      const store = new Store(".preference.dat");
-      const form = document.querySelector('#preference');
+      const store = new Store(".config.dat");
+      const form = document.querySelector('#config');
 
       function set_form(form, data) {
         for (const [name, value] of Object.entries(data)) {
             const input = form.elements[name];
-
             if (input.type === 'radio') {
                 const radio = [...form.elements[name]].find(r => r.value === value);
                 if (radio) {
@@ -33,12 +32,15 @@
       }
 
       async function update_config() {
+        config ||= {}; // if config==null then config={}
+
         const data = new FormData(form);
         for(const [k,v] of data) {
           config[k] = JSON.parse(v);
         }
-        console.info(data)
-        console.info(config)
+
+        await invoke("submit_config", config);
+        console.info(config);
       }
 
       async function save_config() {
@@ -50,7 +52,7 @@
       }
 
       async function time_report() {
-        await invoke("time_report", config);
+        await invoke("time_report");
       }
 
       async function main(_) {
@@ -61,11 +63,10 @@
           update_ui();
         }
 
-        document.querySelector('#preference').addEventListener('submit', async (e)=>{
+        document.querySelector('#config').addEventListener('submit', async (e)=>{
           e.preventDefault();
 
           update_config();
-          console.info(config);
 
           await save_config();
         });
@@ -80,47 +81,51 @@
   </head>
 
   <body>
-    <form id='preference'>
+    <form id='config'>
 
       <fieldset>
         <legend>时间格式</legend>
         <div>
           <input type="radio" name="hour12" value="false" checked></input>
-          <label for="hour24">使用24小时制</label>
+          <label>使用24小时制</label>
   
           <input type="radio" name="hour12" value="true"></input>
-          <label for="hour12">使用12小时制</label>
+          <label>使用12小时制</label>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>报时规则</legend>
         <div>
-          <input type="radio" name="period" value="3600" checked></input>
-          <label for="hour24">整点报时</label>
+          <input type="radio" name="integralMinutes" value="[0]" checked></input>
+          <label>整点报时</label>
   
-          <input type="radio" name="period" value="1800"></input>
-          <label for="hour12">半点报时</label>
+          <input type="radio" name="integralMinutes" value="[0,30]"></input>
+          <label>半点报时</label>
+
+          <input type="radio" name="integralMinutes" value="[0,10,20,30,40,50]"></input>
+          <label>十分钟报时</label>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>播报日期</legend>
         <div>
-          <input type="radio" name="date_report" value="&quot;none&quot;" checked></input>
-          <label for="date_report">不播报日期</label>
+          <input type="radio" name="dateReport" value="&quot;none&quot;" checked></input>
+          <label for="dateReport">不播报日期</label>
   
-          <input type="radio" name="date_report" value="&quot;week&quot;"></input>
-          <label for="date_report">播报星期</label>
+          <input type="radio" name="dateReport" value="&quot;week&quot;" disabled></input>
+          <label for="dateReport">播报星期</label>
 
-          <input type="radio" name="date_report" value="&quot;mmdd&quot;"></input>
-          <label for="date_report">播报月日</label>
+          <input type="radio" name="dateReport" value="&quot;mmdd&quot;" disabled></input>
+          <label for="dateReport">播报月日</label>
 
-          <input type="radio" name="date_report" value="&quot;yymmdd&quot;"></input>
-          <label for="date_report">播报年月日</label>
+          <input type="radio" name="dateReport" value="&quot;yymmdd&quot;" disabled></input>
+          <label for="dateReport">播报年月日</label>
         </div>
       </fieldset>
 
+      <!--
       <fieldset>
         <legend>开机启动</legend>
         <div>
@@ -128,12 +133,12 @@
           <label for="startup">开机启动 (未实现)</label>
         </div>
       </fieldset>
-
+      -->
       <fieldset>
         <legend>关于</legend>
         <div>
           <img src="img/logo.svg" width="32">
-          <label for="hour12">Speaking Alarm v0.0.1</label>
+          <label>Speaking Alarm v0.0.1</label>
         </div>
       </fieldset>
 

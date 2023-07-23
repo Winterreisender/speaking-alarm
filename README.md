@@ -1,6 +1,6 @@
 # 语音钟
 
-用Tauri复刻[saying语音钟](https://www.appinn.com/voice-clock/)的功能。
+用Tauri复刻[saying语音钟](https://www.appinn.com/voice-clock/)的功能。二十多年前的软件了。
 
 # 目标
 
